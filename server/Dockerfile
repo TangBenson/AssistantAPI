@@ -13,4 +13,4 @@ RUN pip install -r requirements.txt
 
 # Container 啟動指令：Container 啟動後通過 python 運行 test_api.py
 # CMD ["python", "./run.py"]
-CMD ["uvicorn", "run:app", "--host", "127.0.0.1", "--port", "8000"]
+CMD ["uvicorn", "run:app", "--host", "0.0.0.0", "--port", "8000"]
