@@ -11,10 +11,12 @@ namespace OpenAIAssistant.Controllers
     public class AIWeatherController : ControllerBase
     {
         private readonly IConfiguration _configuration;
+        private static string _apiKey = "xxxxxxxxx";
         //constructor
         public AIWeatherController(IConfiguration configuration)
         {
             _configuration = configuration;
+            _apiKey = _configuration["OpenAIServiceOptions:ApiKey"];
         }
 
         [HttpGet]

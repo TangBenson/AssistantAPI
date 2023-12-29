@@ -20,19 +20,19 @@ namespace OpenAIAssistant
         // private readonly object tools = new List<object> { new { type = "retrieval" } };
         // private readonly string model = "gpt-3.5-turbo-1106";
         // private readonly List<string> file_ids = new List<string> { file1Id };
-        private static string apiKey = "xxxxxxxxx";
+        private static string _apiKey = "xxxxxxxxx";
 
         public Assistant(IConfiguration configuration)
         {
             _configuration = configuration;
-            apiKey = _configuration["OpenAIServiceOptions:ApiKey"];
+            _apiKey = _configuration["OpenAIServiceOptions:ApiKey"];
         }
 
         public async Task CreateAssistant(string instructions, string name, List<object> tools, string model, List<string> file_ids)
         {
             var url = "https://api.openai.com/v1/assistants";
             using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
             client.DefaultRequestHeaders.Add("OpenAI-Beta", "assistants=v1");
             var jsonStr = JsonSerializer.Serialize(new
             {
@@ -66,7 +66,7 @@ namespace OpenAIAssistant
         {
             var url = "https://api.openai.com/v1/assistants?order=desc&limit=20";
             using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
             client.DefaultRequestHeaders.Add("OpenAI-Beta", "assistants=v1");
             var response = await client.GetAsync(url);
             if (response.IsSuccessStatusCode)

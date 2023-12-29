@@ -9,10 +9,12 @@ namespace OpenAIAssistant
 {
     public class ChatThread
     {
+        private readonly IConfiguration _configuration;
         private static string _apiKey = "xxxxxxxxx";
-        public ChatThread(string apiKey)
+        public ChatThread(IConfiguration configuration)
         {
-            _apiKey = apiKey;
+            _configuration = configuration;
+            _apiKey = _configuration["OpenAIServiceOptions:ApiKey"];
         }
 
         // 建立 Thread
