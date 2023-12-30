@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace OpenAIAssistant.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     public class AIWeatherController : ControllerBase
     {
         // private readonly string file1Id = "file-9xpwQr4rni98mUcrQtlkDkvc";
@@ -19,23 +19,71 @@ namespace OpenAIAssistant.Controllers
                                                 非天氣問題一律回答'老子只他媽懂天氣'";
         private readonly string assistantName = "天氣之子";
         //code_interpreter, retrieval, or function
-        private readonly object tools = new List<object> { new { type = "retrieval" } };
+        private readonly List<object> tools = new() {
+            new { type = "retrieval" },
+            new { type = "code_interpreter" },
+            new {
+                type = "function",
+                function = new {
+                    name= "get_city_for_date",
+                    description= "根据传入的日期获取对应的城市.",
+                    parameters = new {
+                        type="object",
+                        properties=new {
+                            date_str=new {
+                                type= "string",
+                                description= "用于获取对应城市的日期，格式为YYYY-MM-DD."
+                            }
+                        }
+                    }
+                }
+            }
+        };
         private readonly string model = "gpt-3.5-turbo-1106";
         // private readonly List<string> file_ids = new List<string> { file1Id };
-        public AIWeatherController()
+        private readonly Assistant _assistant;
+        private static string _assistantId = "asst_yRXtzWuhFOPv1xqZrcHj5rrV";
+        private string _threadId = "";
+        public AIWeatherController(Assistant assistant)
         {
+            _assistant = assistant;
+        }
+
+        // 這樣會404，why?
+        // [HttpGet]
+        // public async Task GetAssistantAsync()
+        // {
+        //     if (_assistantId == "")
+        //     {
+        //         await _assistant.CreateAssistant(instructions, assistantName, tools, model, null);
+        //     }
+        // }
+
+        [HttpGet]
+        public async void GetAssistant()
+        {
+            if (_assistantId == "")
+            {
+                _assistantId = await _assistant.CreateAssistant(instructions, assistantName, tools, model, new List<string>());
+                Console.WriteLine($"建立assistantId成功");
+            }
+            else
+            {
+                Console.WriteLine($"已經有assistantId了");
+            }
         }
 
         [HttpGet]
-        public async Task CreateThreadEndpoint()
+        public async Task<string> CreateThreadEndpoint()
         {
-            
+            _threadId = await _assistant.CreateThread();
+            return _threadId;
         }
 
         [HttpPost]
-        public async Task ChatEndpoint()
+        public async Task<(string rmsg, string img)> ChatEndpoint(string msg, string threadId)
         {
-            
+            return ("","");
         }
     }
 }
