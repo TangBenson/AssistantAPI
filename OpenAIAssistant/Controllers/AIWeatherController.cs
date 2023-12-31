@@ -41,49 +41,51 @@ namespace OpenAIAssistant.Controllers
         };
         private readonly string model = "gpt-3.5-turbo-1106";
         // private readonly List<string> file_ids = new List<string> { file1Id };
-        private readonly Assistant _assistant;
+        // private readonly Assistant _assistant;
         private static string _assistantId = "asst_yRXtzWuhFOPv1xqZrcHj5rrV";
-        private string _threadId = "";
-        public AIWeatherController(Assistant assistant)
+        public AIWeatherController()
         {
-            _assistant = assistant;
+            // _assistant = assistant;
         }
 
         // 這樣會404，why?
         // [HttpGet]
-        // public async Task GetAssistantAsync()
+        // public async Task<string> GetAssistantAsync() => 
+        //     _assistantId == "" ? await Assistant.CreateAssistant(instructions, assistantName, tools, model, null) : "";
+
+        // 已經取過了就不用再取了
+        // [HttpGet]
+        // public async Task GetAssistant()
         // {
         //     if (_assistantId == "")
         //     {
-        //         await _assistant.CreateAssistant(instructions, assistantName, tools, model, null);
+        //         _assistantId = await Assistant.CreateAssistant(instructions, assistantName, tools, model, new List<string>());
+        //         Console.WriteLine($"建立assistantId成功");
+        //     }
+        //     else
+        //     {
+        //         Console.WriteLine($"已經有assistantId了");
         //     }
         // }
 
         [HttpGet]
-        public async void GetAssistant()
-        {
-            if (_assistantId == "")
-            {
-                _assistantId = await _assistant.CreateAssistant(instructions, assistantName, tools, model, new List<string>());
-                Console.WriteLine($"建立assistantId成功");
-            }
-            else
-            {
-                Console.WriteLine($"已經有assistantId了");
-            }
-        }
+        public async Task<ActionResult> GetAssistantsList() =>
+            Ok(await Assistant.ListAssistants());
 
+        //前端要存著threadId
         [HttpGet]
-        public async Task<string> CreateThreadEndpoint()
-        {
-            _threadId = await _assistant.CreateThread();
-            return _threadId;
-        }
+        public async Task<ActionResult> CreateThreadEndpoint() =>
+            Ok(await Assistant.CreateThread());
 
         [HttpPost]
-        public async Task<(string rmsg, string img)> ChatEndpoint(string msg, string threadId)
+        public async Task<(string rmsg, string img)> ChatEndpoint(
+            string msg,
+            string threadId)
         {
-            return ("","");
+            await Assistant.CreateMessage(msg, threadId);
+            await Assistant.CreateRun(threadId, _assistantId);
+            await Assistant.ListMessages(threadId);
+            return ("", "");
         }
     }
 }
