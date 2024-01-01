@@ -17,28 +17,26 @@ namespace OpenAIAssistant.Controllers
         {
             new { type = "retrieval" },
             new { type = "code_interpreter" },
-            // new {
-            //     type = "function",
-            //     function = new {
-            //         name = "GetRumor",
-            //         description = "根據傳入的人名，取得他的緋聞對象名字",
-            //         parameters = new {
-            //             type = "object",
-            //             properties = new {
-            //                 personName = new {
-            //                     type = "string",
-            //                     description = "取得人名"
-            //                 }
-            //             },
-            //             required = new List<string> { "personName" }
-            //         }
-            //     }
-            // }
+            new {
+                type = "function",
+                function = new {
+                    name = "GetRumor",
+                    description = "根據傳入的人名，取得他的緋聞對象名字",
+                    parameters = new {
+                        type = "object",
+                        properties = new {
+                            personName = new {
+                                type = "string",
+                                description = "取得人名"
+                            }
+                        },
+                        required = new List<string> { "personName" }
+                    }
+                }
+            }
         };
-        // private readonly string model = "gpt-4-1106-preview";
-        private readonly string model = "gpt-3.5-turbo-1106";
-        // private static string _assistantId = "";//gpt-4-preview-1106
-        private static string _assistantId = "asst_2eRjH2pw3IjnR3ayzJXf51RX";//gpt-3.5-turbo-1106
+        private readonly string model = "gpt-3.5-turbo-1106"; //gpt-4-preview-1106
+        private static string _assistantId = "asst_ogUZnJZD8RZR2kUiuVQrQFgm";
         // private readonly List<string> file_ids = new List<string> { file1Id };
         private readonly Assistant _assistant;
         public AIWeatherController(Assistant assistant)

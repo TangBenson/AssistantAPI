@@ -122,6 +122,7 @@ namespace OpenAIAssistant
                     if (status == "requires_action")
                     {
                         //呼叫function來處理
+                        break;
 
                     }
                     else if (status == "error" || status == "failed")
