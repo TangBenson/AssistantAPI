@@ -57,14 +57,14 @@ namespace OpenAIAssistant
         {
             var url = "https://api.openai.com/v1/threads";
 
-            var responseRoot = await CallAPI(url, null, "GET");
+            var responseRoot = await CallAPI(url, null, "POST");
             return responseRoot.ValueKind == JsonValueKind.Undefined ?
                     "" :
                     responseRoot.GetProperty("id").GetString()!;
         }
 
         //發送使用者 Message
-        internal async Task CreateMessage(string threadId, string question)
+        internal async Task CreateMessage(string question, string threadId)
         {
             Console.WriteLine($"發送msg給LLM");
             var url = $"https://api.openai.com/v1/threads/{threadId}/messages";
@@ -74,11 +74,11 @@ namespace OpenAIAssistant
                 content = question
             });
 
-            var responseRoot = await CallAPI(url, jsonStr, "POST");
-            Console.WriteLine(
-                responseRoot.ValueKind == JsonValueKind.Undefined ?
-                "" :
-                responseRoot.GetString()!);
+            _ = await CallAPI(url, jsonStr, "POST");
+            // Console.WriteLine(
+            //     responseRoot.ValueKind == JsonValueKind.Undefined ?
+            //     "" :
+            //     responseRoot.GetString()!);
         }
 
         // 取回 Message
@@ -102,7 +102,6 @@ namespace OpenAIAssistant
             var url = $"https://api.openai.com/v1/threads/{threadId}/runs";
             var jsonStr = JsonSerializer.Serialize(new
             {
-                thread_id = threadId,
                 assistant_id = assistantId
             });
             var responseRoot = await CallAPI(url, jsonStr, "POST");
@@ -113,8 +112,8 @@ namespace OpenAIAssistant
                 while (true)
                 {
                     var status = await RetrieveRun(threadId, runId);
-                    await ListRunSteps(threadId, runId);
-
+                    // await ListRunSteps(threadId, runId);
+                    
                     while (status == "queued" || status == "in_progress")
                     {
                         await Task.Delay(2000);
@@ -129,6 +128,15 @@ namespace OpenAIAssistant
                     {
                         break;
                     }
+                    else if (status == "complete")
+                    {
+                        await ListMessages(threadId);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"未知的status:{status}");
+                        break;
+                    }
                 }
             }
         }
@@ -138,6 +146,7 @@ namespace OpenAIAssistant
             var url = $"https://api.openai.com/v1/threads/{threadId}/runs/{runId}";
             var responseRoot = await CallAPI(url, null, "get");
             string status = responseRoot.GetProperty("status").GetString()!;
+            Console.WriteLine($"status資訊:{status}");
             return status;
         }
 
@@ -188,7 +197,7 @@ namespace OpenAIAssistant
             client.DefaultRequestHeaders.Add("OpenAI-Beta", "assistants=v1");
 
             var response = method == "POST" ?
-                await client.PostAsync(url, new StringContent(jsonStr,Encoding.UTF8,"application/json")) :
+                await client.PostAsync(url, string.IsNullOrEmpty(jsonStr) ? null : new StringContent(jsonStr, Encoding.UTF8, "application/json")) :
                 await client.GetAsync(url);
             Console.WriteLine($"FYI ~ {response.Content.ReadAsStringAsync().Result}");
             if (response.IsSuccessStatusCode)

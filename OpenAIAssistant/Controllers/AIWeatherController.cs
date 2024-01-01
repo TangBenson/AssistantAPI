@@ -17,28 +17,28 @@ namespace OpenAIAssistant.Controllers
         {
             new { type = "retrieval" },
             new { type = "code_interpreter" },
-            new {
-                type = "function",
-                function = new {
-                    name = "GetRumor",
-                    description = "根據傳入的人名，取得他的緋聞對象名字",
-                    parameters = new {
-                        type = "object",
-                        properties = new {
-                            personName = new {
-                                type = "string",
-                                description = "取得人名"
-                            }
-                        },
-                        required = new List<string> { "personName" }
-                    }
-                }
-            }
+            // new {
+            //     type = "function",
+            //     function = new {
+            //         name = "GetRumor",
+            //         description = "根據傳入的人名，取得他的緋聞對象名字",
+            //         parameters = new {
+            //             type = "object",
+            //             properties = new {
+            //                 personName = new {
+            //                     type = "string",
+            //                     description = "取得人名"
+            //                 }
+            //             },
+            //             required = new List<string> { "personName" }
+            //         }
+            //     }
+            // }
         };
-        private readonly string model = "gpt-4-1106-preview";
-        // private readonly string model = "gpt-3.5-turbo-1106";
+        // private readonly string model = "gpt-4-1106-preview";
+        private readonly string model = "gpt-3.5-turbo-1106";
         // private static string _assistantId = "";//gpt-4-preview-1106
-        private static string _assistantId = "asst_yRXtzWuhFOPv1xqZrcHj5rrV";//gpt-3.5-turbo-1106
+        private static string _assistantId = "asst_2eRjH2pw3IjnR3ayzJXf51RX";//gpt-3.5-turbo-1106
         // private readonly List<string> file_ids = new List<string> { file1Id };
         private readonly Assistant _assistant;
         public AIWeatherController(Assistant assistant)
@@ -79,19 +79,18 @@ namespace OpenAIAssistant.Controllers
         public async Task<ActionResult> GetAssistantsList() =>
             Ok(await _assistant.ListAssistants());
 
-        //前端要存著threadId
+        //前端要存著threadId - thread_5KE7QDTrGktZxsJfFQkW0zYi
         [HttpGet]
         public async Task<ActionResult> CreateThreadEndpoint() =>
             Ok(await _assistant.CreateThread());
 
         [HttpPost]
         public async Task<(string rmsg, string img)> ChatEndpoint(
-            string msg,
-            string threadId)
+            [FromBody] ChatRequest chatRequest)
         {
-            await _assistant.CreateMessage(msg, threadId);
-            await _assistant.CreateRun(threadId, _assistantId);
-            await _assistant.ListMessages(threadId);
+            //傳入參數若寫成[FromBody]string msg,string threadId會錯....
+            await _assistant.CreateMessage(chatRequest.Msg!, chatRequest.ThreadId!);
+            await _assistant.CreateRun(chatRequest.ThreadId!, _assistantId);
             return ("", "");
         }
     }
