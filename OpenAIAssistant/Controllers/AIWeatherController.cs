@@ -36,7 +36,7 @@ namespace OpenAIAssistant.Controllers
             }
         };
         private readonly string model = "gpt-3.5-turbo-1106"; //gpt-4-preview-1106
-        private static string _assistantId = "asst_ogUZnJZD8RZR2kUiuVQrQFgm";
+        private static string _assistantId = "asst_7Vg3qRPX3SIvrDUXWtBqlWla";
         // private readonly List<string> file_ids = new List<string> { file1Id };
         private readonly Assistant _assistant;
         public AIWeatherController(Assistant assistant)
@@ -82,14 +82,22 @@ namespace OpenAIAssistant.Controllers
         public async Task<ActionResult> CreateThreadEndpoint() =>
             Ok(await _assistant.CreateThread());
 
+
+        [HttpDelete]
+        public async Task<ActionResult> DeleteThreadEndpoint([FromQuery] string threadId)
+        {
+            await _assistant.DeleteThread(threadId);
+            return Ok();
+        }
+
         [HttpPost]
-        public async Task<(string rmsg, string img)> ChatEndpoint(
+        public async Task<string> ChatEndpoint(
             [FromBody] ChatRequest chatRequest)
         {
             //傳入參數若寫成[FromBody]string msg,string threadId會錯....
             await _assistant.CreateMessage(chatRequest.Msg!, chatRequest.ThreadId!);
-            await _assistant.CreateRun(chatRequest.ThreadId!, _assistantId);
-            return ("", "");
+            var rspContent = await _assistant.CreateRun(chatRequest.ThreadId!, _assistantId);
+            return rspContent;
         }
     }
 }
