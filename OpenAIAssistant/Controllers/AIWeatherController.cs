@@ -11,29 +11,29 @@ namespace OpenAIAssistant.Controllers
     public class AIWeatherController : ControllerBase
     {
         // private readonly string file1Id = "file-9xpwQr4rni98mUcrQtlkDkvc";
-        private readonly string instructions = "我會告訴你最新演藝圈八卦";
-        private readonly string assistantName = "狗仔隊";
+        private readonly string instructions = "沒加入function功能的基礎模型測試";
+        private readonly string assistantName = "基礎LLM模型";
         private readonly List<object> tools = new()
         {
             new { type = "retrieval" },
-            new { type = "code_interpreter" },
-            new {
-                type = "function",
-                function = new {
-                    name = "GetRumor",
-                    description = "根據傳入的人名，取得他的緋聞對象名字",
-                    parameters = new {
-                        type = "object",
-                        properties = new {
-                            personName = new {
-                                type = "string",
-                                description = "取得人名"
-                            }
-                        },
-                        required = new List<string> { "personName" }
-                    }
-                }
-            }
+            // new { type = "code_interpreter" },
+            // new {
+            //     type = "function",
+            //     function = new {
+            //         name = "GetRumor",
+            //         description = "根據傳入的人名，取得他的緋聞對象名字",
+            //         parameters = new {
+            //             type = "object",
+            //             properties = new {
+            //                 personName = new {
+            //                     type = "string",
+            //                     description = "取得人名"
+            //                 }
+            //             },
+            //             required = new List<string> { "personName" }
+            //         }
+            //     }
+            // }
         };
         private readonly string model = "gpt-3.5-turbo-1106"; //gpt-4-preview-1106
         private static string _assistantId = "asst_7Vg3qRPX3SIvrDUXWtBqlWla";
@@ -43,6 +43,8 @@ namespace OpenAIAssistant.Controllers
         {
             _assistant = assistant;
         }
+
+
 
         // 這樣會404，why?
         // [HttpGet]
@@ -76,6 +78,12 @@ namespace OpenAIAssistant.Controllers
         [HttpGet]
         public async Task<ActionResult> GetAssistantsList() =>
             Ok(await _assistant.ListAssistants());
+
+        [HttpGet]
+        public ActionResult ModifyMyAIAssistant()
+        {
+            return Ok(_assistant.ModifyAssistant(_assistantId));
+        }
 
         //前端要存著threadId - thread_5KE7QDTrGktZxsJfFQkW0zYi
         [HttpGet]
