@@ -1,20 +1,18 @@
 import './App.css';
 import React, { useState, useEffect } from "react";
-// import Image from "next/image";
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css"
 import { MainContainer, ChatContainer, MessageList, Message, MessageInput, TypingIndicator } from "@chatscope/chat-ui-kit-react";
-
+import picc from './cat.png';
 
 function App() {
   const [initialized, setInitialized] = useState(false);
   const [threadId, setThreadId] = useState(null);
+  //true: GPT正在回覆訊息
   const [typing, setTyping] = useState(false);
-  const [messages, setMessages] = useState([
+  const [messageArray, setMessages] = useState([
     {
-      message: "喵~",
-      sender: "小黑",
-      direction: "incoming",
-      position: "single"
+      message: "還迎來到八卦天地，專門提供沒營養的新聞"
+      // image: data.image
     }
   ]);
 
@@ -23,57 +21,57 @@ function App() {
       createNewThread();
       setInitialized(true);
     }
-  }, [initialized]);
+  });
 
   const createNewThread = async () => {
-    await fetch("http://127.0.0.1:8000/create_thread").then((data) => {
-      return data.json();
-    }).then((data) => {
+    await fetch("https://localhost:9001/api/AIWeather/CreateThreadEndpoint")
+    .then(response => response.text())
+    .then((data) => {
       console.log(data);
-      setThreadId(data.thread_id);
+      setThreadId(data);
+      console.log(threadId);
     })
   };
 
+  //按下發送訊息按鈕
   const sendQuery = async (message) => {
     const newMessage = {
-      message: message,
-      sender: "user",
-      direction: "outgoing",
-      position: "single"
+      message: message
+      // image: data.image
     }
-    const newMessages = [...messages, newMessage];
-    setMessages(newMessages);
+    //newMessage加到已存在的messageArray陣列，結果存到newMessageArray，但messageArray不會變
+    const newMessageArray = [...messageArray, newMessage];
+    setMessages(newMessageArray);
     setTyping(true);
-    await processMessage(newMessages);
+    await processMessage(newMessageArray);
   };
 
-  async function processMessage(messages) {
+  //發送訊息給後端
+  async function processMessage(messageArray) {
     if (!threadId) {
       console.error("Thread ID is not set");
       return;
     }
-    let message = messages[messages.length - 1];
+    let message = messageArray[messageArray.length - 1];
     console.log(message);
-    await fetch("http://127.0.0.1:8000/chat", {
+    let chatRequest = {
+        Msg: message.message,
+        ThreadId: threadId
+    }
+    await fetch("https://localhost:9001/api/AIWeather/ChatEndpoint", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        message: message.message,
-        thread_id: threadId
-      }),
-    }).then((data) => {
-      return data.json();
-    }).then((data) => {
-      console.log(data);
+      body: JSON.stringify(chatRequest),
+    })
+    .then(response => response.text()) // 或者 response.json()，如果回傳的是 JSON
+    .then(data => {
+      console.log(data); // 這裡的 data 就是你的字串或者 JSON 物件
       setMessages([
-        ...messages, {
-          message: data.message,
-          sender: "小黑",
-          direction: "incoming",
-          position: "single",
-          image: data.image
+        ...messageArray, {
+          message: data
+          // image: data.image
         }
       ]);
       setTyping(false);
@@ -82,29 +80,28 @@ function App() {
 
   return (
     <div className="flex flex-col h-screen items-center px-4">
-      <h1 className="mt-8 mb-4 text-3xl font-mono font-semibold">好奇的黑猫</h1>
-      {/* <Image src="/cat.png" alt="Curious Black Cat" width={100} height={100} className="mb-4 rounded-full shadow-lg border-2" /> */}
+      <h1 className="mt-8 mb-4 text-3xl font-mono font-semibold">狗仔隊</h1>
+      <img src={picc} alt="Curious Black Cat" width={100} height={100} className="mb-4 rounded-full shadow-lg border-2" />
       <div className="w-1/2 h-screen mb-8">
         <MainContainer className="rounded-lg shadow-lg max-h-[45rem]">
           <ChatContainer>
             <MessageList
               className="my-4"
               scrollBehavior="smooth"
-              typingIndicator={typing ? <TypingIndicator content="小黑正在接收并回复消息..." /> : null}
+              typingIndicator={typing ? <TypingIndicator content="AI正在答覆你的問題..." /> : null}
             >
-              {messages.map((message, i) => {
+              {messageArray.map((message, i) => {
                 return (
                   <Message key={i} model={message}>
-                    {message.image && <Message.ImageContent src={message.image} alt="Image" width={500} />}
+                    {/* {message.image && <Message.ImageContent src={message.image} alt="Image" width={500} />} */}
                   </Message>
                 );
               })}
             </MessageList>
-            <MessageInput placeholder="喵~" onSend={sendQuery} />
+            <MessageInput placeholder="問點啥~" onSend={sendQuery} />
           </ChatContainer>
         </MainContainer>
       </div>
-
     </div>
   );
 }
