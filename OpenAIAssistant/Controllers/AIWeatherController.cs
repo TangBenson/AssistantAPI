@@ -36,7 +36,7 @@ namespace OpenAIAssistant.Controllers
             // }
         };
         private readonly string model = "gpt-3.5-turbo-1106"; //gpt-4-preview-1106
-        private static string _assistantId = "asst_7Vg3qRPX3SIvrDUXWtBqlWla";
+        private static string _assistantId = "dddd";
         // private readonly List<string> file_ids = new List<string> { file1Id };
         private readonly Assistant _assistant;
         public AIWeatherController(Assistant assistant)
